@@ -1,0 +1,2125 @@
+{
+"workflows": [
+{
+"agent_variants": [
+{
+"agent_id": 9090,
+"agent_name": "order cancellation agent",
+"variant_id": 889
+}
+],
+"apps": [
+{
+"id": "122223"
+}
+],
+"definition": {
+"tasks": [
+{
+"configurations": {
+"trigger": {
+"trigger_on": "user_request",
+"user_request": {
+"content": "When user asks for order cancellation"
+}
+}
+},
+"id": "start_message",
+"label": "Cancel Order Request",
+"type": "trigger"
+},
+{
+"configurations": {
+"input_parameters": {
+"cancellation_reason": {
+"description": "Reason for cancellation",
+"type": "string"
+},
+"order_id": {
+"description": "Order ID to cancel",
+"type": "number"
+}
+},
+"required": [
+"order_id",
+"cancellation_reason"
+]
+},
+"id": "88928-04",
+"label": "Get Order Information",
+"type": "user_input"
+},
+{
+"configurations": {
+"cases": {
+"default": {
+"condition_data": null,
+"label": "Order not eligible for cancellation",
+"sequence": 3
+},
+"pending": {
+"condition_data": {
+"conditions": [
+{
+"lookup_path": "{{get_user_input_id.order_id}}",
+"matcher": "text",
+"operator": "equals",
+"value": "pending"
+}
+],
+"selector": "all"
+},
+"label": "Order is pending",
+"sequence": 1
+},
+"processing": {
+"condition_data": {
+"conditions": [
+{
+"lookup_path": "{{get_user_input_id.order_id}}",
+"matcher": "text",
+"operator": "equals",
+"value": "processing"
+}
+],
+"selector": "all"
+},
+"label": "Order is processing",
+"sequence": 2
+}
+}
+},
+"id": "11122-06",
+"label": "Check Order Eligibility",
+"type": "condition"
+},
+{
+"configurations": {
+"action_id": "JUDO_001",
+"ask_for_confirmation": true,
+"input_mappings": {
+"cancellation_reason": {
+"source": "{{get_user_input_id.cancellation_reason}}"
+},
+"order_id": {
+"source": "{{get_user_input_id.order_id}}"
+},
+"user_email": {
+"source": "{{context.user.email}}"
+}
+},
+"post_message": {
+"id": "MSG_021",
+"type": "FREDDY_GENERATE"
+}
+},
+"id": "11122232323",
+"label": "Cancel Order",
+"type": "action"
+},
+{
+"configurations": {
+"input_mapping": {
+"get_user_input_id.cancellation_reason": {
+"source": "get_user_input_id[\"cancellation_reason\"]"
+},
+"get_user_input_id.order_id": {
+"source": "get_user_input_id[\"order_id\"]"
+}
+},
+"message": {
+"content": "Your pending order {{get_user_input_id.order_id}} has been cancelled. Reason: {{get_user_input_id.cancellation_reason}}",
+"id": "MSG_001",
+"type": "FREDDY_GENERATE"
+}
+},
+"id": "1009922",
+"label": "Cancellation Confirmation - Pending",
+"type": "message"
+},
+{
+"configurations": {
+"input_mapping": {
+"get_user_input_id.cancellation_reason": {
+"source": "get_user_input_id[\"cancellation_reason\"]"
+},
+"get_user_input_id.order_id": {
+"source": "get_user_input_id[\"order_id\"]"
+}
+},
+"message": {
+"content": "Your processing order {{get_user_input_id.order_id}} has been cancelled. Reason: {{get_user_input_id.cancellation_reason}}",
+"id": "MSG_001-2",
+"type": "FREDDY_GENERATE"
+}
+},
+"id": "1009922-2",
+"label": "Cancellation Confirmation - Processing",
+"type": "message"
+},
+{
+"configurations": {
+"group_id": 1232,
+"handoff_type": "ASSIGN_TO_GROUP",
+"input_mapping": {
+"context.user.name": {
+"display_text": "name",
+"source": "{{context[\"user\"][\"name\"]}}"
+}
+},
+"message": {
+"content": "Your order cancellation request has been received. An agent will assist you shortly.",
+"id": "MSG_011"
+}
+},
+"id": "1009923",
+"label": "Handover to Agent",
+"type": "agent_handover"
+}
+],
+"transitions": [
+{
+"source": "start_message",
+"target": "88928-04"
+},
+{
+"source": "88928-04",
+"target": "11122232323"
+},
+{
+"source": "11122232323",
+"target": "11122-06"
+},
+{
+"conditional": {
+"case_id": "pending"
+},
+"source": "11122-06",
+"target": "1009922"
+},
+{
+"conditional": {
+"case_id": "processing"
+},
+"source": "11122-06",
+"target": "1009922-2"
+},
+{
+"conditional": {
+"case_id": "default"
+},
+"source": "11122-06",
+"target": "1009923"
+}
+]
+},
+"description": "This is to cancel the order",
+"id": 1,
+"name": "Order cancellation flow",
+"state": "ACTIVE",
+"type": "WORKFLOW"
+},
+{
+"agent_variants": [
+{
+"agent_id": 9091,
+"agent_name": "order update agent",
+"variant_id": 890
+}
+],
+"apps": [
+{
+"id": "122224"
+}
+],
+"definition": {
+"tasks": [
+{
+"configurations": {
+"trigger": {
+"trigger_on": "user_request",
+"user_request": {
+"content": "When user asks for order update"
+}
+}
+},
+"id": "update_message",
+"label": "Update Order Request",
+"type": "trigger"
+},
+{
+"configurations": {
+"input_parameters": {
+"new_status": {
+"description": "New status for the order",
+"type": "string"
+},
+"order_id": {
+"description": "Order ID to update",
+"type": "number"
+}
+},
+"required": [
+"order_id",
+"new_status"
+]
+},
+"id": "88928-05",
+"label": "Get Update Information",
+"type": "user_input"
+},
+{
+"configurations": {
+"cases": {
+"default": {
+"condition_data": null,
+"label": "Order not eligible for update",
+"sequence": 3
+},
+"pending": {
+"condition_data": {
+"conditions": [
+{
+"lookup_path": "{{action_node_id.order_id}}",
+"matcher": "text",
+"operator": "equals",
+"value": "pending"
+}
+],
+"selector": "all"
+},
+"label": "Order is pending",
+"sequence": 1
+},
+"processing": {
+"condition_data": {
+"conditions": [
+{
+"lookup_path": "{{action_node_id.order_id}}",
+"matcher": "text",
+"operator": "equals",
+"value": "processing"
+}
+],
+"selector": "all"
+},
+"label": "Order is processing",
+"sequence": 2
+}
+},
+"input_mappings": {
+"action_node.life_time_order_value": {
+"display_text": "life_time_order_value",
+"source": "{{action_node[\"life_time_order_value\"]}}"
+},
+"action_node_id.order_id": {
+"display_text": "order_id",
+"source": "{{action_node_id[\"order_id\"]}}"
+},
+"action_node_id.order_status": {
+"display_text": "order_status",
+"source": "{{action_node_id[\"order_status\"]}}"
+},
+"get_input_id.order_status": {
+"display_text": "order_status",
+"source": "{{get_input_id[\"order_status\"]}}"
+}
+}
+},
+"id": "11122-07",
+"label": "Check Update Eligibility",
+"type": "condition"
+},
+{
+"configurations": {
+"input_mapping": {
+"get_user_input_id.new_status": {
+"source": "get_user_input_id[\"new_status\"]"
+},
+"get_user_input_id.order_id": {
+"source": "get_user_input_id[\"order_id\"]"
+}
+},
+"message": {
+"content": "Your pending order {{get_user_input_id.order_id}} has been updated to {{get_user_input_id.new_status}}",
+"id": "MSG_002",
+"type": "TEMPLATED"
+}
+},
+"id": "77783743",
+"label": "Update Confirmation - Pending",
+"type": "message"
+},
+{
+"configurations": {
+"input_mapping": {
+"get_user_input_id.new_status": {
+"source": "get_user_input_id[\"new_status\"]"
+},
+"get_user_input_id.order_id": {
+"source": "get_user_input_id[\"order_id\"]"
+}
+},
+"message": {
+"content": "Your processing order {{get_user_input_id.order_id}} has been updated to {{get_user_input_id.new_status}}",
+"id": "MSG_002-2",
+"type": "TEMPLATED"
+}
+},
+"id": "77783743-2",
+"label": "Update Confirmation - Processing",
+"type": "message"
+},
+{
+"configurations": {
+"action_id": "JUDO_002",
+"ask_for_confirmation": true,
+"input_mappings": {
+"new_status": {
+"source": "{{get_user_input_id.new_status}}"
+},
+"order_id": {
+"source": "{{get_user_input_id.order_id}}"
+},
+"user_email": {
+"source": "{{context.user.email}}"
+}
+},
+"post_message": {
+"id": "MSG_022",
+"type": "FREDDY_GENERATE"
+}
+},
+"id": "11122232324",
+"label": "Update Order",
+"type": "action"
+},
+{
+"configurations": {
+"handoff_type": "AVAILABLE_FOR_ASSIGNMENT",
+"input_mapping": {
+"context.user.name": {
+"display_text": "name",
+"source": "{{context[\"user\"][\"name\"]}}"
+}
+},
+"message": {
+"content": "Your order update request has been received. An agent will assist you shortly.",
+"id": "MSG_012"
+}
+},
+"id": "77783752",
+"label": "Handover to Agent",
+"type": "agent_handover"
+}
+],
+"transitions": [
+{
+"source": "update_message",
+"target": "88928-05"
+},
+{
+"source": "88928-05",
+"target": "11122232324"
+},
+{
+"source": "11122232324",
+"target": "11122-07"
+},
+{
+"conditional": {
+"case_id": "pending"
+},
+"source": "11122-07",
+"target": "77783743"
+},
+{
+"conditional": {
+"case_id": "processing"
+},
+"source": "11122-07",
+"target": "77783743-2"
+},
+{
+"conditional": {
+"case_id": "default"
+},
+"source": "11122-07",
+"target": "77783752"
+}
+]
+},
+"description": "This is to update the order",
+"id": 2,
+"name": "Order update flow",
+"state": "ACTIVE",
+"type": "WORKFLOW"
+},
+{
+"agent_variants": [
+{
+"agent_id": 9091,
+"agent_name": "order tracking agent",
+"variant_id": 890
+}
+],
+"apps": [
+{
+"id": "122224"
+}
+],
+"definition": {
+"tasks": [
+{
+"configurations": {
+"trigger": {
+"trigger_on": "user_request",
+"user_request": {
+"content": "When user asks for order tracking"
+}
+}
+},
+"id": "tracking_message",
+"label": "Track Order Request",
+"type": "trigger"
+},
+{
+"configurations": {
+"input_parameters": {
+"order_id": {
+"description": "Order ID to track",
+"type": "number"
+}
+},
+"required": [
+"order_id"
+]
+},
+"id": "88928-06",
+"label": "Get Tracking Information",
+"type": "user_input"
+},
+{
+"configurations": {
+"cases": {
+"default": {
+"condition_data": null,
+"label": "Order not eligible for tracking",
+"sequence": 3
+},
+"pending": {
+"condition_data": {
+"conditions": [
+{
+"lookup_path": "{{get_user_input_id.order_id}}",
+"matcher": "text",
+"operator": "equals",
+"value": "pending"
+}
+],
+"selector": "all"
+},
+"label": "Order is pending",
+"sequence": 1
+},
+"shipped": {
+"condition_data": {
+"conditions": [
+{
+"lookup_path": "{{get_user_input_id.order_id}}",
+"matcher": "text",
+"operator": "equals",
+"value": "shipped"
+}
+],
+"selector": "all"
+},
+"label": "Order is shipped",
+"sequence": 2
+}
+},
+"input_mappings": {
+"get_user_input_id.order_id": {
+"display_text": "order_id",
+"source": "{{get_user_input_id[\"order_id\"]}}"
+}
+}
+},
+"id": "11122-08",
+"label": "Check Tracking Eligibility",
+"type": "condition"
+},
+{
+"configurations": {
+"action_id": "JUDO_003",
+"ask_for_confirmation": true,
+"input_mappings": {
+"order_id": {
+"source": "{{get_user_input_id.order_id}}"
+},
+"user_email": {
+"source": "{{context.user.email}}"
+}
+},
+"post_message": {
+"id": "MSG_023",
+"type": "FREDDY_GENERATE"
+}
+},
+"id": "11122232325",
+"label": "Track Order",
+"type": "action"
+},
+{
+"configurations": {
+"input_mapping": {
+"get_user_input_id.order_id": {
+"source": "get_user_input_id[\"order_id\"]"
+},
+"get_user_input_id.tracking_status": {
+"source": "get_user_input_id[\"tracking_status\"]"
+}
+},
+"message": {
+"content": "Your pending order {{get_user_input_id.order_id}} is currently {{get_user_input_id.tracking_status}}",
+"id": "MSG_003",
+"type": "TEMPLATED"
+}
+},
+"id": "77783744",
+"label": "Tracking Information - Pending",
+"type": "message"
+},
+{
+"configurations": {
+"input_mapping": {
+"get_user_input_id.order_id": {
+"source": "get_user_input_id[\"order_id\"]"
+},
+"get_user_input_id.tracking_status": {
+"source": "get_user_input_id[\"tracking_status\"]"
+}
+},
+"message": {
+"content": "Your shipped order {{get_user_input_id.order_id}} is currently {{get_user_input_id.tracking_status}}",
+"id": "MSG_003-2",
+"type": "TEMPLATED"
+}
+},
+"id": "77783744-2",
+"label": "Tracking Information - Shipped",
+"type": "message"
+},
+{
+"configurations": {
+"handoff_type": "AVAILABLE_FOR_ASSIGNMENT",
+"input_mapping": {
+"context.user.name": {
+"display_text": "name",
+"source": "{{context[\"user\"][\"name\"]}}"
+}
+},
+"message": {
+"content": "Your order tracking request has been received. An agent will assist you shortly.",
+"id": "MSG_013"
+}
+},
+"id": "77783753",
+"label": "Handover to Agent",
+"type": "agent_handover"
+}
+],
+"transitions": [
+{
+"source": "tracking_message",
+"target": "88928-06"
+},
+{
+"source": "88928-06",
+"target": "11122232325"
+},
+{
+"source": "11122232325",
+"target": "11122-08"
+},
+{
+"conditional": {
+"case_id": "pending"
+},
+"source": "11122-08",
+"target": "77783744"
+},
+{
+"conditional": {
+"case_id": "shipped"
+},
+"source": "11122-08",
+"target": "77783744-2"
+},
+{
+"conditional": {
+"case_id": "default"
+},
+"source": "11122-08",
+"target": "77783753"
+}
+]
+},
+"description": "This is to track the order",
+"id": 3,
+"name": "Order tracking flow",
+"state": "ACTIVE",
+"type": "WORKFLOW"
+},
+{
+"agent_variants": [
+{
+"agent_id": 9091,
+"agent_name": "refund agent",
+"variant_id": 890
+}
+],
+"apps": [
+{
+"id": "122224"
+}
+],
+"definition": {
+"tasks": [
+{
+"configurations": {
+"trigger": {
+"trigger_on": "user_request",
+"user_request": {
+"content": "When user asks for refund"
+}
+}
+},
+"id": "refund_message",
+"label": "Refund Request",
+"type": "trigger"
+},
+{
+"configurations": {
+"input_parameters": {
+"order_id": {
+"description": "Order ID for refund",
+"type": "number"
+},
+"refund_reason": {
+"description": "Reason for refund",
+"type": "string"
+}
+},
+"required": [
+"order_id",
+"refund_reason"
+]
+},
+"id": "88928-07",
+"label": "Get Refund Information",
+"type": "user_input"
+},
+{
+"configurations": {
+"conditions": [
+{
+"case_id": "eligible",
+"condition": "order.status in ['pending', 'processing', 'shipped']"
+},
+{
+"case_id": "default",
+"condition": "True"
+}
+]
+},
+"id": "11122-15",
+"label": "Check Order Status",
+"type": "condition"
+},
+{
+"configurations": {
+"cases": {
+"default": {
+"condition_data": null,
+"label": "Order not eligible for refund",
+"sequence": 3
+},
+"delivered": {
+"condition_data": {
+"conditions": [
+{
+"lookup_path": "{{get_user_input_id.order_id}}",
+"matcher": "text",
+"operator": "equals",
+"value": "delivered"
+}
+],
+"selector": "all"
+},
+"label": "Order is delivered",
+"sequence": 1
+},
+"shipped": {
+"condition_data": {
+"conditions": [
+{
+"lookup_path": "{{get_user_input_id.order_id}}",
+"matcher": "text",
+"operator": "equals",
+"value": "shipped"
+}
+],
+"selector": "all"
+},
+"label": "Order is shipped",
+"sequence": 2
+}
+}
+},
+"id": "11122-09",
+"label": "Check Refund Eligibility",
+"type": "condition"
+},
+{
+"configurations": {
+"action_id": "JUDO_004",
+"ask_for_confirmation": true,
+"input_mappings": {
+"order_id": {
+"source": "{{get_user_input_id.order_id}}"
+},
+"refund_reason": {
+"source": "{{get_user_input_id.refund_reason}}"
+},
+"user_email": {
+"source": "{{context.user.email}}"
+}
+},
+"post_message": {
+"id": "MSG_024",
+"type": "FREDDY_GENERATE"
+}
+},
+"id": "11122232326",
+"label": "Process Refund",
+"type": "action"
+},
+{
+"configurations": {
+"input_mapping": {
+"get_user_input_id.order_id": {
+"source": "get_user_input_id[\"order_id\"]"
+},
+"get_user_input_id.refund_reason": {
+"source": "get_user_input_id[\"refund_reason\"]"
+}
+},
+"message": {
+"content": "Your delivered order {{get_user_input_id.order_id}} refund request has been received. Reason: {{get_user_input_id.refund_reason}}",
+"id": "MSG_004",
+"type": "TEMPLATED"
+}
+},
+"id": "77783745",
+"label": "Refund Confirmation - Delivered",
+"type": "message"
+},
+{
+"configurations": {
+"input_mapping": {
+"get_user_input_id.order_id": {
+"source": "get_user_input_id[\"order_id\"]"
+},
+"get_user_input_id.refund_reason": {
+"source": "get_user_input_id[\"refund_reason\"]"
+}
+},
+"message": {
+"content": "Your shipped order {{get_user_input_id.order_id}} refund request has been received. Reason: {{get_user_input_id.refund_reason}}",
+"id": "MSG_004-2",
+"type": "TEMPLATED"
+}
+},
+"id": "77783745-2",
+"label": "Refund Confirmation - Shipped",
+"type": "message"
+},
+{
+"configurations": {
+"group_id": 1232,
+"handoff_type": "ASSIGN_TO_GROUP",
+"input_mapping": {
+"context.user.name": {
+"display_text": "name",
+"source": "{{context[\"user\"][\"name\"]}}"
+}
+},
+"message": {
+"content": "Your refund request has been received. An agent will assist you shortly.",
+"id": "MSG_014"
+}
+},
+"id": "77783754",
+"label": "Handover to Agent",
+"type": "agent_handover"
+}
+],
+"transitions": [
+{
+"source": "refund_message",
+"target": "88928-07"
+},
+{
+"source": "88928-07",
+"target": "11122232326"
+},
+{
+"source": "11122232326",
+"target": "11122-15"
+},
+{
+"conditional": {
+"case_id": "delivered"
+},
+"source": "11122-15",
+"target": "77783745"
+},
+{
+"conditional": {
+"case_id": "shipped"
+},
+"source": "11122-15",
+"target": "77783745-2"
+},
+{
+"conditional": {
+"case_id": "default"
+},
+"source": "11122-15",
+"target": "77783754"
+}
+]
+},
+"description": "This is to process refunds",
+"id": 4,
+"name": "Refund flow",
+"state": "ACTIVE",
+"type": "WORKFLOW"
+},
+{
+"agent_variants": [
+{
+"agent_id": 9091,
+"agent_name": "feedback agent",
+"variant_id": 890
+}
+],
+"apps": [
+{
+"id": "122224"
+}
+],
+"definition": {
+"tasks": [
+{
+"configurations": {
+"trigger": {
+"trigger_on": "user_request",
+"user_request": {
+"content": "When user wants to provide feedback"
+}
+}
+},
+"id": "feedback_message",
+"label": "Feedback Request",
+"type": "trigger"
+},
+{
+"configurations": {
+"input_parameters": {
+"feedback_text": {
+"description": "Detailed feedback",
+"type": "string"
+},
+"order_id": {
+"description": "Order ID for feedback",
+"type": "number"
+},
+"rating": {
+"description": "Rating (1-5)",
+"type": "number"
+}
+},
+"required": [
+"order_id",
+"rating",
+"feedback_text"
+]
+},
+"id": "88928-08",
+"label": "Get Feedback Information",
+"type": "user_input"
+},
+{
+"configurations": {
+"cases": {
+"default": {
+"condition_data": null,
+"label": "Order not eligible for feedback",
+"sequence": 2
+},
+"delivered": {
+"condition_data": {
+"conditions": [
+{
+"lookup_path": "{{get_user_input_id.order_id}}",
+"matcher": "text",
+"operator": "equals",
+"value": "delivered"
+}
+],
+"selector": "all"
+},
+"label": "Order is delivered",
+"sequence": 1
+}
+}
+},
+"id": "11122-10",
+"label": "Check Feedback Eligibility",
+"type": "condition"
+},
+{
+"configurations": {
+"action_id": "JUDO_005",
+"ask_for_confirmation": true,
+"input_mappings": {
+"feedback_text": {
+"source": "{{get_user_input_id.feedback_text}}"
+},
+"order_id": {
+"source": "{{get_user_input_id.order_id}}"
+},
+"rating": {
+"source": "{{get_user_input_id.rating}}"
+},
+"user_email": {
+"source": "{{context.user.email}}"
+}
+},
+"post_message": {
+"id": "MSG_025",
+"type": "FREDDY_GENERATE"
+}
+},
+"id": "11122232327",
+"label": "Submit Feedback",
+"type": "action"
+},
+{
+"configurations": {
+"input_mapping": {
+"get_user_input_id.order_id": {
+"source": "get_user_input_id[\"order_id\"]"
+},
+"get_user_input_id.rating": {
+"source": "get_user_input_id[\"rating\"]"
+}
+},
+"message": {
+"content": "Thank you for your feedback! Order: {{get_user_input_id.order_id}}, Rating: {{get_user_input_id.rating}}",
+"id": "MSG_005",
+"type": "TEMPLATED"
+}
+},
+"id": "77783746",
+"label": "Feedback Confirmation",
+"type": "message"
+},
+{
+"configurations": {
+"handoff_type": "AVAILABLE_FOR_ASSIGNMENT",
+"input_mapping": {
+"context.user.name": {
+"display_text": "name",
+"source": "{{context[\"user\"][\"name\"]}}"
+}
+},
+"message": {
+"content": "Your feedback has been received. An agent will review it shortly.",
+"id": "MSG_015"
+}
+},
+"id": "77783755",
+"label": "Handover to Agent",
+"type": "agent_handover"
+}
+],
+"transitions": [
+{
+"source": "feedback_message",
+"target": "88928-08"
+},
+{
+"source": "88928-08",
+"target": "11122232327"
+},
+{
+"source": "11122232327",
+"target": "11122-10"
+},
+{
+"conditional": {
+"case_id": "delivered"
+},
+"source": "11122-10",
+"target": "77783746"
+},
+{
+"conditional": {
+"case_id": "default"
+},
+"source": "11122-10",
+"target": "77783755"
+}
+]
+},
+"description": "This is to collect feedback",
+"id": 5,
+"name": "Feedback flow",
+"state": "ACTIVE",
+"type": "WORKFLOW"
+},
+{
+"agent_variants": [
+{
+"agent_id": 9091,
+"agent_name": "complaint agent",
+"variant_id": 890
+}
+],
+"apps": [
+{
+"id": "122224"
+}
+],
+"definition": {
+"tasks": [
+{
+"configurations": {
+"trigger": {
+"trigger_on": "user_request",
+"user_request": {
+"content": "When user wants to file a complaint"
+}
+}
+},
+"id": "complaint_message",
+"label": "Complaint Request",
+"type": "trigger"
+},
+{
+"configurations": {
+"input_parameters": {
+"complaint_details": {
+"description": "Detailed complaint",
+"type": "string"
+},
+"complaint_type": {
+"description": "Type of complaint",
+"type": "string"
+},
+"order_id": {
+"description": "Order ID for complaint",
+"type": "number"
+}
+},
+"required": [
+"order_id",
+"complaint_type",
+"complaint_details"
+]
+},
+"id": "88928-09",
+"label": "Get Complaint Information",
+"type": "user_input"
+},
+{
+"configurations": {
+"cases": {
+"default": {
+"condition_data": null,
+"label": "Order not eligible for complaint",
+"sequence": 3
+},
+"pending": {
+"condition_data": {
+"conditions": [
+{
+"lookup_path": "{{get_user_input_id.order_id}}",
+"matcher": "text",
+"operator": "equals",
+"value": "pending"
+}
+],
+"selector": "all"
+},
+"label": "Order is pending",
+"sequence": 1
+},
+"shipped": {
+"condition_data": {
+"conditions": [
+{
+"lookup_path": "{{get_user_input_id.order_id}}",
+"matcher": "text",
+"operator": "equals",
+"value": "shipped"
+}
+],
+"selector": "all"
+},
+"label": "Order is shipped",
+"sequence": 2
+}
+}
+},
+"id": "11122-11",
+"label": "Check Complaint Eligibility",
+"type": "condition"
+},
+{
+"configurations": {
+"action_id": "JUDO_006",
+"ask_for_confirmation": true,
+"input_mappings": {
+"complaint_details": {
+"source": "{{get_user_input_id.complaint_details}}"
+},
+"complaint_type": {
+"source": "{{get_user_input_id.complaint_type}}"
+},
+"order_id": {
+"source": "{{get_user_input_id.order_id}}"
+},
+"user_email": {
+"source": "{{context.user.email}}"
+}
+},
+"post_message": {
+"id": "MSG_026",
+"type": "FREDDY_GENERATE"
+}
+},
+"id": "11122232328",
+"label": "Submit Complaint",
+"type": "action"
+},
+{
+"configurations": {
+"input_mapping": {
+"get_user_input_id.complaint_type": {
+"source": "get_user_input_id[\"complaint_type\"]"
+},
+"get_user_input_id.order_id": {
+"source": "get_user_input_id[\"order_id\"]"
+}
+},
+"message": {
+"content": "Your complaint for pending order {{get_user_input_id.order_id}} has been received. Type: {{get_user_input_id.complaint_type}}",
+"id": "MSG_006",
+"type": "TEMPLATED"
+}
+},
+"id": "77783747",
+"label": "Complaint Confirmation - Pending",
+"type": "message"
+},
+{
+"configurations": {
+"input_mapping": {
+"get_user_input_id.complaint_type": {
+"source": "get_user_input_id[\"complaint_type\"]"
+},
+"get_user_input_id.order_id": {
+"source": "get_user_input_id[\"order_id\"]"
+}
+},
+"message": {
+"content": "Your complaint for shipped order {{get_user_input_id.order_id}} has been received. Type: {{get_user_input_id.complaint_type}}",
+"id": "MSG_006-2",
+"type": "TEMPLATED"
+}
+},
+"id": "77783747-2",
+"label": "Complaint Confirmation - Shipped",
+"type": "message"
+},
+{
+"configurations": {
+"group_id": 1232,
+"handoff_type": "ASSIGN_TO_GROUP",
+"input_mapping": {
+"context.user.name": {
+"display_text": "name",
+"source": "{{context[\"user\"][\"name\"]}}"
+}
+},
+"message": {
+"content": "Your complaint has been received. An agent will assist you shortly.",
+"id": "MSG_016"
+}
+},
+"id": "77783756",
+"label": "Handover to Agent",
+"type": "agent_handover"
+}
+],
+"transitions": [
+{
+"source": "complaint_message",
+"target": "88928-09"
+},
+{
+"source": "88928-09",
+"target": "11122232328"
+},
+{
+"source": "11122232328",
+"target": "11122-11"
+},
+{
+"conditional": {
+"case_id": "pending"
+},
+"source": "11122-11",
+"target": "77783747"
+},
+{
+"conditional": {
+"case_id": "shipped"
+},
+"source": "11122-11",
+"target": "77783747-2"
+},
+{
+"conditional": {
+"case_id": "default"
+},
+"source": "11122-11",
+"target": "77783756"
+}
+]
+},
+"description": "This is to handle complaints",
+"id": 6,
+"name": "Complaint flow",
+"state": "ACTIVE",
+"type": "WORKFLOW"
+},
+{
+"agent_variants": [
+{
+"agent_id": 9091,
+"agent_name": "product inquiry agent",
+"variant_id": 890
+}
+],
+"apps": [
+{
+"id": "122224"
+}
+],
+"definition": {
+"tasks": [
+{
+"configurations": {
+"trigger": {
+"trigger_on": "user_request",
+"user_request": {
+"content": "When user asks about a product"
+}
+}
+},
+"id": "inquiry_message",
+"label": "Product Inquiry Request",
+"type": "trigger"
+},
+{
+"configurations": {
+"input_parameters": {
+"inquiry_details": {
+"description": "Detailed inquiry",
+"type": "string"
+},
+"inquiry_type": {
+"description": "Type of inquiry",
+"type": "string"
+},
+"product_id": {
+"description": "Product ID or name",
+"type": "string"
+}
+},
+"required": [
+"product_id",
+"inquiry_type",
+"inquiry_details"
+]
+},
+"id": "88928-10",
+"label": "Get Inquiry Information",
+"type": "user_input"
+},
+{
+"configurations": {
+"cases": {
+"default": {
+"condition_data": null,
+"label": "Inquiry is not valid",
+"sequence": 3
+},
+"product": {
+"condition_data": {
+"conditions": [
+{
+"lookup_path": "{{get_user_input_id.inquiry_type}}",
+"matcher": "text",
+"operator": "equals",
+"value": "product"
+}
+],
+"selector": "all"
+},
+"label": "Product inquiry",
+"sequence": 1
+},
+"shipping": {
+"condition_data": {
+"conditions": [
+{
+"lookup_path": "{{get_user_input_id.inquiry_type}}",
+"matcher": "text",
+"operator": "equals",
+"value": "shipping"
+}
+],
+"selector": "all"
+},
+"label": "Shipping inquiry",
+"sequence": 2
+}
+}
+},
+"id": "11122-12",
+"label": "Check Inquiry Eligibility",
+"type": "condition"
+},
+{
+"configurations": {
+"action_id": "JUDO_007",
+"ask_for_confirmation": true,
+"input_mappings": {
+"inquiry_details": {
+"source": "{{get_user_input_id.inquiry_details}}"
+},
+"inquiry_type": {
+"source": "{{get_user_input_id.inquiry_type}}"
+},
+"product_id": {
+"source": "{{get_user_input_id.product_id}}"
+},
+"user_email": {
+"source": "{{context.user.email}}"
+}
+},
+"post_message": {
+"id": "MSG_027",
+"type": "FREDDY_GENERATE"
+}
+},
+"id": "11122232329",
+"label": "Process Inquiry",
+"type": "action"
+},
+{
+"configurations": {
+"input_mapping": {
+"get_user_input_id.inquiry_type": {
+"source": "get_user_input_id[\"inquiry_type\"]"
+},
+"get_user_input_id.product_id": {
+"source": "get_user_input_id[\"product_id\"]"
+}
+},
+"message": {
+"content": "Your product inquiry about {{get_user_input_id.product_id}} has been received. Type: {{get_user_input_id.inquiry_type}}",
+"id": "MSG_007",
+"type": "TEMPLATED"
+}
+},
+"id": "77783748",
+"label": "Inquiry Confirmation - Product",
+"type": "message"
+},
+{
+"configurations": {
+"input_mapping": {
+"get_user_input_id.inquiry_type": {
+"source": "get_user_input_id[\"inquiry_type\"]"
+},
+"get_user_input_id.product_id": {
+"source": "get_user_input_id[\"product_id\"]"
+}
+},
+"message": {
+"content": "Your shipping inquiry about {{get_user_input_id.product_id}} has been received. Type: {{get_user_input_id.inquiry_type}}",
+"id": "MSG_007-2",
+"type": "TEMPLATED"
+}
+},
+"id": "77783748-2",
+"label": "Inquiry Confirmation - Shipping",
+"type": "message"
+},
+{
+"configurations": {
+"handoff_type": "AVAILABLE_FOR_ASSIGNMENT",
+"input_mapping": {
+"context.user.name": {
+"display_text": "name",
+"source": "{{context[\"user\"][\"name\"]}}"
+}
+},
+"message": {
+"content": "Your product inquiry has been received. An agent will assist you shortly.",
+"id": "MSG_017"
+}
+},
+"id": "77783757",
+"label": "Handover to Agent",
+"type": "agent_handover"
+}
+],
+"transitions": [
+{
+"source": "inquiry_message",
+"target": "88928-10"
+},
+{
+"source": "88928-10",
+"target": "11122232329"
+},
+{
+"source": "11122232329",
+"target": "11122-12"
+},
+{
+"conditional": {
+"case_id": "product"
+},
+"source": "11122-12",
+"target": "77783748"
+},
+{
+"conditional": {
+"case_id": "shipping"
+},
+"source": "11122-12",
+"target": "77783748-2"
+},
+{
+"conditional": {
+"case_id": "default"
+},
+"source": "11122-12",
+"target": "77783757"
+}
+]
+},
+"description": "This is to handle product inquiries",
+"id": 7,
+"name": "Product inquiry flow",
+"state": "ACTIVE",
+"type": "WORKFLOW"
+},
+{
+"agent_variants": [
+{
+"agent_id": 9091,
+"agent_name": "shipping info agent",
+"variant_id": 890
+}
+],
+"apps": [
+{
+"id": "122224"
+}
+],
+"definition": {
+"tasks": [
+{
+"configurations": {
+"trigger": {
+"trigger_on": "user_request",
+"user_request": {
+"content": "When user asks about shipping"
+}
+}
+},
+"id": "shipping_message",
+"label": "Shipping Info Request",
+"type": "trigger"
+},
+{
+"configurations": {
+"input_parameters": {
+"order_id": {
+"description": "Order ID for shipping info",
+"type": "number"
+},
+"shipping_type": {
+"description": "Type of shipping info needed",
+"type": "string"
+}
+},
+"required": [
+"order_id",
+"shipping_type"
+]
+},
+"id": "88928-11",
+"label": "Get Shipping Information",
+"type": "user_input"
+},
+{
+"configurations": {
+"cases": {
+"default": {
+"condition_data": null,
+"label": "Order not eligible for shipping info",
+"sequence": 2
+},
+"shipped": {
+"condition_data": {
+"conditions": [
+{
+"lookup_path": "{{get_user_input_id.order_id}}",
+"matcher": "text",
+"operator": "equals",
+"value": "shipped"
+}
+],
+"selector": "all"
+},
+"label": "Order is shipped",
+"sequence": 1
+}
+}
+},
+"id": "11122-13",
+"label": "Check Shipping Info Eligibility",
+"type": "condition"
+},
+{
+"configurations": {
+"action_id": "JUDO_008",
+"ask_for_confirmation": true,
+"input_mappings": {
+"order_id": {
+"source": "{{get_user_input_id.order_id}}"
+},
+"shipping_type": {
+"source": "{{get_user_input_id.shipping_type}}"
+},
+"user_email": {
+"source": "{{context.user.email}}"
+}
+},
+"post_message": {
+"id": "MSG_028",
+"type": "FREDDY_GENERATE"
+}
+},
+"id": "11122232330",
+"label": "Get Shipping Info",
+"type": "action"
+},
+{
+"configurations": {
+"input_mapping": {
+"get_user_input_id.order_id": {
+"source": "get_user_input_id[\"order_id\"]"
+},
+"get_user_input_id.shipping_type": {
+"source": "get_user_input_id[\"shipping_type\"]"
+}
+},
+"message": {
+"content": "Shipping information for order {{get_user_input_id.order_id}}: {{get_user_input_id.shipping_type}}",
+"id": "MSG_008",
+"type": "TEMPLATED"
+}
+},
+"id": "77783749",
+"label": "Shipping Info Response",
+"type": "message"
+},
+{
+"configurations": {
+"handoff_type": "AVAILABLE_FOR_ASSIGNMENT",
+"input_mapping": {
+"context.user.name": {
+"display_text": "name",
+"source": "{{context[\"user\"][\"name\"]}}"
+}
+},
+"message": {
+"content": "Your shipping information request has been received. An agent will assist you shortly.",
+"id": "MSG_018"
+}
+},
+"id": "77783758",
+"label": "Handover to Agent",
+"type": "agent_handover"
+}
+],
+"transitions": [
+{
+"source": "shipping_message",
+"target": "88928-11"
+},
+{
+"source": "88928-11",
+"target": "11122232330"
+},
+{
+"source": "11122232330",
+"target": "11122-13"
+},
+{
+"conditional": {
+"case_id": "shipped"
+},
+"source": "11122-13",
+"target": "77783749"
+},
+{
+"conditional": {
+"case_id": "default"
+},
+"source": "11122-13",
+"target": "77783758"
+}
+]
+},
+"description": "This is to provide shipping information",
+"id": 8,
+"name": "Shipping info flow",
+"state": "ACTIVE",
+"type": "WORKFLOW"
+},
+{
+"agent_variants": [
+{
+"agent_id": 9091,
+"agent_name": "account update agent",
+"variant_id": 890
+}
+],
+"apps": [
+{
+"id": "122224"
+}
+],
+"definition": {
+"tasks": [
+{
+"configurations": {
+"trigger": {
+"trigger_on": "user_request",
+"user_request": {
+"content": "When user wants to update account"
+}
+}
+},
+"id": "account_message",
+"label": "Account Update Request",
+"type": "trigger"
+},
+{
+"configurations": {
+"input_parameters": {
+"update_details": {
+"description": "Details of the update",
+"type": "string"
+},
+"update_type": {
+"description": "Type of account update",
+"type": "string"
+}
+},
+"required": [
+"update_type",
+"update_details"
+]
+},
+"id": "88928-12",
+"label": "Get Account Update Information",
+"type": "user_input"
+},
+{
+"configurations": {
+"cases": {
+"default": {
+"condition_data": null,
+"label": "Account update is not valid",
+"sequence": 2
+},
+"email": {
+"condition_data": {
+"conditions": [
+{
+"lookup_path": "{{get_user_input_id.update_type}}",
+"matcher": "text",
+"operator": "equals",
+"value": "email"
+}
+],
+"selector": "all"
+},
+"label": "Email update",
+"sequence": 1
+}
+}
+},
+"id": "11122-14",
+"label": "Check Account Update Eligibility",
+"type": "condition"
+},
+{
+"configurations": {
+"action_id": "JUDO_009",
+"ask_for_confirmation": true,
+"input_mappings": {
+"update_details": {
+"source": "{{get_user_input_id.update_details}}"
+},
+"update_type": {
+"source": "{{get_user_input_id.update_type}}"
+},
+"user_email": {
+"source": "{{context.user.email}}"
+}
+},
+"post_message": {
+"id": "MSG_029",
+"type": "FREDDY_GENERATE"
+}
+},
+"id": "11122232331",
+"label": "Update Account",
+"type": "action"
+},
+{
+"configurations": {
+"input_mapping": {
+"get_user_input_id.update_type": {
+"source": "get_user_input_id[\"update_type\"]"
+}
+},
+"message": {
+"content": "Your account update request has been received. Type: {{get_user_input_id.update_type}}",
+"id": "MSG_009",
+"type": "TEMPLATED"
+}
+},
+"id": "77783750",
+"label": "Account Update Confirmation",
+"type": "message"
+},
+{
+"configurations": {
+"group_id": 1232,
+"handoff_type": "ASSIGN_TO_GROUP",
+"input_mapping": {
+"context.user.name": {
+"display_text": "name",
+"source": "{{context[\"user\"][\"name\"]}}"
+}
+},
+"message": {
+"content": "Your account update request has been received. An agent will assist you shortly.",
+"id": "MSG_019"
+}
+},
+"id": "77783759",
+"label": "Handover to Agent",
+"type": "agent_handover"
+}
+],
+"transitions": [
+{
+"source": "account_message",
+"target": "88928-12"
+},
+{
+"source": "88928-12",
+"target": "11122232331"
+},
+{
+"source": "11122232331",
+"target": "11122-14"
+},
+{
+"conditional": {
+"case_id": "email"
+},
+"source": "11122-14",
+"target": "77783750"
+},
+{
+"conditional": {
+"case_id": "default"
+},
+"source": "11122-14",
+"target": "77783759"
+}
+]
+},
+"description": "This is to handle account updates",
+"id": 9,
+"name": "Account update flow",
+"state": "ACTIVE",
+"type": "WORKFLOW"
+},
+{
+"agent_variants": [
+{
+"agent_id": 9091,
+"agent_name": "subscription agent",
+"variant_id": 890
+}
+],
+"apps": [
+{
+"id": "122224"
+}
+],
+"definition": {
+"tasks": [
+{
+"configurations": {
+"trigger": {
+"trigger_on": "user_request",
+"user_request": {
+"content": "When user wants to manage subscription"
+}
+}
+},
+"id": "subscription_message",
+"label": "Subscription Request",
+"type": "trigger"
+},
+{
+"configurations": {
+"input_parameters": {
+"action": {
+"description": "Action to perform",
+"type": "string"
+},
+"details": {
+"description": "Additional details",
+"type": "string"
+},
+"subscription_id": {
+"description": "Subscription ID",
+"type": "string"
+}
+},
+"required": [
+"subscription_id",
+"action",
+"details"
+]
+},
+"id": "88928-13",
+"label": "Get Subscription Information",
+"type": "user_input"
+},
+{
+"configurations": {
+"cases": {
+"default": {
+"condition_data": null,
+"label": "Subscription action is not valid",
+"sequence": 3
+},
+"pause": {
+"condition_data": {
+"conditions": [
+{
+"lookup_path": "{{get_user_input_id.action}}",
+"matcher": "text",
+"operator": "equals",
+"value": "pause"
+}
+],
+"selector": "all"
+},
+"label": "Pause subscription",
+"sequence": 1
+},
+"resume": {
+"condition_data": {
+"conditions": [
+{
+"lookup_path": "{{get_user_input_id.action}}",
+"matcher": "text",
+"operator": "equals",
+"value": "resume"
+}
+],
+"selector": "all"
+},
+"label": "Resume subscription",
+"sequence": 2
+}
+}
+},
+"id": "11122-15",
+"label": "Check Subscription Eligibility",
+"type": "condition"
+},
+{
+"configurations": {
+"action_id": "JUDO_010",
+"ask_for_confirmation": true,
+"input_mappings": {
+"action": {
+"source": "{{get_user_input_id.action}}"
+},
+"details": {
+"source": "{{get_user_input_id.details}}"
+},
+"subscription_id": {
+"source": "{{get_user_input_id.subscription_id}}"
+},
+"user_email": {
+"source": "{{context.user.email}}"
+}
+},
+"post_message": {
+"id": "MSG_030",
+"type": "FREDDY_GENERATE"
+}
+},
+"id": "11122232332",
+"label": "Manage Subscription",
+"type": "action"
+},
+{
+"configurations": {
+"input_mapping": {
+"get_user_input_id.action": {
+"source": "get_user_input_id[\"action\"]"
+},
+"get_user_input_id.subscription_id": {
+"source": "get_user_input_id[\"subscription_id\"]"
+}
+},
+"message": {
+"content": "Your subscription {{get_user_input_id.subscription_id}} has been paused. Action: {{get_user_input_id.action}}",
+"id": "MSG_010",
+"type": "TEMPLATED"
+}
+},
+"id": "77783751",
+"label": "Subscription Confirmation - Pause",
+"type": "message"
+},
+{
+"configurations": {
+"input_mapping": {
+"get_user_input_id.action": {
+"source": "get_user_input_id[\"action\"]"
+},
+"get_user_input_id.subscription_id": {
+"source": "get_user_input_id[\"subscription_id\"]"
+}
+},
+"message": {
+"content": "Your subscription {{get_user_input_id.subscription_id}} has been resumed. Action: {{get_user_input_id.action}}",
+"id": "MSG_010-2",
+"type": "TEMPLATED"
+}
+},
+"id": "77783751-2",
+"label": "Subscription Confirmation - Resume",
+"type": "message"
+},
+{
+"configurations": {
+"group_id": 1232,
+"handoff_type": "ASSIGN_TO_GROUP",
+"input_mapping": {
+"context.user.name": {
+"display_text": "name",
+"source": "{{context[\"user\"][\"name\"]}}"
+}
+},
+"message": {
+"content": "Your subscription request has been received. An agent will assist you shortly.",
+"id": "MSG_020"
+}
+},
+"id": "77783760",
+"label": "Handover to Agent",
+"type": "agent_handover"
+}
+],
+"transitions": [
+{
+"source": "subscription_message",
+"target": "88928-13"
+},
+{
+"source": "88928-13",
+"target": "11122232332"
+},
+{
+"source": "11122232332",
+"target": "11122-15"
+},
+{
+"conditional": {
+"case_id": "pause"
+},
+"source": "11122-15",
+"target": "77783751"
+},
+{
+"conditional": {
+"case_id": "resume"
+},
+"source": "11122-15",
+"target": "77783751-2"
+},
+{
+"conditional": {
+"case_id": "default"
+},
+"source": "11122-15",
+"target": "77783760"
+}
+]
+},
+"description": "This is to handle subscriptions",
+"id": 10,
+"name": "Subscription flow",
+"state": "ACTIVE",
+"type": "WORKFLOW"
+}
+]
+}
